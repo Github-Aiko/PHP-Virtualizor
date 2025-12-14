@@ -13,11 +13,19 @@ GitHub Actions đã được cấu hình sẵn trong thư mục `.github/workflo
 - **CI Workflow**: Khi có push hoặc pull request
 - **Auto Update Packagist**: Khi có tag mới được push (ví dụ: `v1.0.0`)
 
+### ⚠️ Lưu ý quan trọng
+
+**Workflows sẽ hoạt động ngay cả khi bạn chưa có package trên Packagist!**
+
+- Workflow **CI** sẽ luôn chạy và test code của bạn
+- Workflows **Packagist** sẽ cảnh báo nếu package chưa tồn tại nhưng **không fail**
+- Bạn có thể push code và chạy CI ngay lập tức, không cần đợi submit lên Packagist
+
 ### Kiểm tra workflows
 
 1. Push code lên GitHub
 2. Vào tab **Actions** trên repository
-3. Bạn sẽ thấy các workflow đã được cấu hình
+3. Bạn sẽ thấy các workflow đã được cấu hình và chạy tự động
 
 ## 🔑 Thiết lập Packagist Token
 
@@ -42,6 +50,8 @@ GitHub Actions đã được cấu hình sẵn trong thư mục `.github/workflo
 5. Click **Add secret**
 
 ✅ Xong! Workflow sẽ tự động sử dụng token này để cập nhật Packagist.
+
+**Lưu ý**: Token này chỉ cần thiết sau khi bạn đã submit package lên Packagist. Workflows vẫn sẽ chạy bình thường nếu chưa có token, chỉ hiển thị cảnh báo.
 
 ## 📦 Publish package lên Packagist
 

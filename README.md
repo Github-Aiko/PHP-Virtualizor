@@ -54,6 +54,12 @@ Project sử dụng GitHub Actions để tự động:
 
 Xem thêm: [.github/workflows/README.md](.github/workflows/README.md)
 
+### Submit lên Packagist
+Để submit package lên Packagist, xem hướng dẫn:
+- **[QUICK_START_PACKAGIST.md](QUICK_START_PACKAGIST.md)** - Hướng dẫn nhanh (3 bước)
+- **[PACKAGIST_SUBMIT.md](PACKAGIST_SUBMIT.md)** - Hướng dẫn chi tiết
+- Hoặc chạy script: `./scripts/submit-to-packagist.sh`
+
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
 

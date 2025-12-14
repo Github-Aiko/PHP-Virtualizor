@@ -39,11 +39,25 @@ jobs:
           fi
           
           echo "🔄 Updating Packagist..."
-          curl -X POST \
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
             -H "Content-Type: application/json" \
             -H "Accept: application/json" \
             -d '{"repository":{"url":"https://github.com/Github-Aiko/PHP-Virtualizor"}}' \
-            "https://packagist.org/api/update-package?username=Github-Aiko&apiToken=$PACKAGIST_TOKEN"
+            "https://packagist.org/api/update-package?username=Github-Aiko&apiToken=$PACKAGIST_TOKEN")
           
-          echo "✅ Packagist updated successfully!"
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "202" ]; then
+            echo "✅ Packagist updated successfully!"
+          elif [ "$HTTP_CODE" = "404" ]; then
+            echo "⚠️  Package not found on Packagist."
+            echo "Please submit your package first at: https://packagist.org/packages/submit"
+            echo "Repository URL: https://github.com/Github-Aiko/PHP-Virtualizor"
+            exit 0
+          else
+            echo "⚠️  Packagist update returned HTTP $HTTP_CODE"
+            echo "Response: $BODY"
+            exit 0
+          fi
 
