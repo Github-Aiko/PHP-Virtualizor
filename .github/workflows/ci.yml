@@ -66,6 +66,6 @@ jobs:
       - name: Validate composer.json
         run: composer validate --strict
       
-      - name: Check composer.json syntax
-        run: composer check-platform-reqs
+      - name: Install dependencies (dry-run)
+        run: composer install --prefer-dist --no-progress --no-interaction --dry-run
 
