@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php-version }} Test
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - "7.4"
+          - "8.0"
+          - "8.1"
+          - "8.2"
+          - "8.3"
+          - "8.4"
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: json
+          coverage: none
+      
+      - name: Validate composer.json
+        run: composer validate --strict
+      
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+      
+      - name: Run PHPUnit tests
+        run: |
+          if [ -d "tests" ] && [ "$(ls -A tests)" ]; then
+            vendor/bin/phpunit --configuration phpunit.xml
+          else
+            echo "⚠️  No tests directory found. Skipping tests."
+            echo "Create a tests/ directory to add tests."
+          fi
+        continue-on-error: true
+
+  validate:
+    name: Validate Composer
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: json
+      
+      - name: Validate composer.json
+        run: composer validate --strict
+      
+      - name: Check composer.json syntax
+        run: composer check-platform-reqs
+

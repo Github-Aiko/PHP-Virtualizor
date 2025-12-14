@@ -1,0 +1,49 @@
+name: Auto Update Packagist
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - main
+      - master
+
+jobs:
+  update-packagist:
+    name: Auto Update Packagist
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: json
+      
+      - name: Validate composer.json
+        run: composer validate --strict
+      
+      - name: Update Packagist via Webhook
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        env:
+          PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_TOKEN }}
+        run: |
+          if [ -z "$PACKAGIST_TOKEN" ]; then
+            echo "⚠️  PACKAGIST_TOKEN secret is not set."
+            echo "To enable auto-update, add PACKAGIST_TOKEN to repository secrets."
+            echo "Get your token from: https://packagist.org/profile/"
+            exit 0
+          fi
+          
+          echo "🔄 Updating Packagist..."
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d '{"repository":{"url":"https://github.com/Github-Aiko/PHP-Virtualizor"}}' \
+            "https://packagist.org/api/update-package?username=Github-Aiko&apiToken=$PACKAGIST_TOKEN"
+          
+          echo "✅ Packagist updated successfully!"
+

@@ -1,0 +1,30 @@
+{
+    "name": "github-aiko/php-virtualizor",
+    "description": "A Wrapper for the Virtualizor API",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["virtualizor", "api", "wrapper", "virtualization"],
+    "homepage": "https://github.com/Github-Aiko/PHP-Virtualizor",
+    "authors": [
+        {
+            "name": "Github-Aiko",
+            "homepage": "https://github.com/Github-Aiko"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/Github-Aiko/PHP-Virtualizor/issues",
+        "source": "https://github.com/Github-Aiko/PHP-Virtualizor"
+    },
+    "autoload": {
+        "psr-4": {
+            "Virtualizor\\":"api/"
+        }
+    },
+    "require": {
+        "php": "^7.4|^8.0",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5|^10.0"
+    }
+}
