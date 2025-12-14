@@ -19,7 +19,6 @@ class OSTemplates {
     {
         $this->client = $client;
         $this->userClient = $userClient;
-        return $this;
     }
 
     public function getOSList(){

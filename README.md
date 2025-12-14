@@ -55,10 +55,13 @@ Project sử dụng GitHub Actions để tự động:
 Xem thêm: [.github/workflows/README.md](.github/workflows/README.md)
 
 ### Submit lên Packagist
-Để submit package lên Packagist, xem hướng dẫn:
-- **[QUICK_START_PACKAGIST.md](QUICK_START_PACKAGIST.md)** - Hướng dẫn nhanh (3 bước)
-- **[PACKAGIST_SUBMIT.md](PACKAGIST_SUBMIT.md)** - Hướng dẫn chi tiết
-- Hoặc chạy script: `./scripts/submit-to-packagist.sh`
+Để submit package lên Packagist:
+1. Truy cập: https://packagist.org/packages/submit
+2. Đăng nhập bằng GitHub
+3. Nhập URL: `https://github.com/Github-Aiko/PHP-Virtualizor`
+4. Click **Check** → **Submit**
+
+Xem hướng dẫn chi tiết: [SETUP.md](SETUP.md)
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.

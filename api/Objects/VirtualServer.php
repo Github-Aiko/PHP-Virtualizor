@@ -20,7 +20,6 @@ class VirtualServer
     {
         $this->client = $client;
         $this->userClient = $userClient;
-        return $this;
     }
 
     public function start($vmid)
@@ -60,14 +59,16 @@ class VirtualServer
      * @param string $rootpassword
      * @param array $ipsv4
      * @param integer $ipv6
-     * @param null $userid
-     * @param null $mail
-     * @param null $username
-     * @param null $firstname
-     * @param null $lastname
+     * @param integer|null $templateId
+     * @param mixed|null $server_group
+     * @param integer|null $userid
+     * @param string|null $mail
+     * @param string|null $username
+     * @param string|null $firstname
+     * @param string|null $lastname
      * @return mixed
      */
-    public function createKVM(int $cores, int $ram, int $disk, string $storageid, int $os, string $hostname, string $rootpassword, array $ipsv4, int $ipv6, int $templateId = null, $server_group = null, $userid = null, $mail = null, $username = null, $firstname = null, $lastname = null)
+    public function createKVM(int $cores, int $ram, int $disk, string $storageid, int $os, string $hostname, string $rootpassword, array $ipsv4, int $ipv6, ?int $templateId = null, $server_group = null, ?int $userid = null, ?string $mail = null, ?string $username = null, ?string $firstname = null, ?string $lastname = null)
     {
         $post = array();
         if (!empty($userid)) {
@@ -119,11 +120,12 @@ class VirtualServer
      * @param string $rootpassword
      * @param array $ipsv4
      * @param integer $ipv6
-     * @param null $userid
-     * @param null $mail
-     * @param null $username
-     * @param null $firstname
-     * @param null $lastname
+     * @param mixed|null $server_group
+     * @param integer|null $userid
+     * @param string|null $mail
+     * @param string|null $username
+     * @param string|null $firstname
+     * @param string|null $lastname
      * @return mixed
      */
     public function createLXC(int $cores, int $ram, int $disk, string $storageid, int $os, string $hostname, string $rootpassword, array $ipsv4, int $ipv6, $server_group = null, $userid = null, $mail = null, $username = null, $firstname = null, $lastname = null)
@@ -187,7 +189,7 @@ class VirtualServer
         return $this->client->editvs($post);
     }
 
-    public function reinstall(int $id, int $os, string $password, int $installer = null)
+    public function reinstall(int $id, int $os, string $password, ?int $installer = null)
     {
         $post = array();
         $post['vpsid'] = $id;
@@ -269,7 +271,7 @@ class VirtualServer
         $post['date'] = $date;
         $post['file'] = $file; //3.0.6.3
         $post['restore'] = 1;
-        $data = $this->userClient->restore_backup($post, $vid);
+        $data = $this->userClient->restore_backup($post, $vm_id);
         return $data;
     }
 
@@ -278,7 +280,7 @@ class VirtualServer
         $post['date'] = $date;
         $post['file'] = $file; //3.0.6.3
         $post['delete'] = 1;
-        $data = $this->userClient->delete_backup($post, $vid);
+        $data = $this->userClient->delete_backup($post, $vm_id);
         return $data;
     }
 

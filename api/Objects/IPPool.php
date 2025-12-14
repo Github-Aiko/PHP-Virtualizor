@@ -18,7 +18,6 @@ class IPPool {
     {
         $this->client = $client;
         $this->userClient = $userClient;
-        return $this;
     }
 
     public function listPools($page = 1, $amount = 200){

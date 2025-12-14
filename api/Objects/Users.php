@@ -19,7 +19,6 @@ class Users
     {
         $this->client = $client;
         $this->userClient = $userClient;
-        return $this;
     }
 
     public function list(int $page = 1, int $amount = 100)
@@ -27,7 +26,7 @@ class Users
         return $this->client->users($page, $amount);
     }
 
-    public function get(string $uid = null, string $email = null)
+    public function get(?string $uid = null, ?string $email = null)
     {
         $page = 1;
         $reslen = 20;
