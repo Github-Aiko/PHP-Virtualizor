@@ -1904,6 +1904,596 @@ class Virtualizor_Admin_API {
         return $result;
     }
 
+    // =============================================
+    // DOMAIN FORWARDING (VPS)
+    // =============================================
+
+    /**
+     * List Domain Forwarding Records for a VPS
+     *
+     * @param int $vpsid The VPS ID
+     * @return array
+     */
+    function list_domain_forwarding($vpsid){
+        $path = 'index.php?act=vpsdomainf&vpsid='.(int)$vpsid;
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Add Domain Forwarding Record
+     *
+     * @param array $post Array containing vpsid, protocol, src_hostname, src_port, dest_ip, dest_port
+     * @return array
+     */
+    function add_domain_forwarding($post){
+        $post['addvdf'] = 1;
+        $path = 'index.php?act=vpsdomainf&vpsid='.(int)$post['vpsid'];
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Edit Domain Forwarding Record
+     *
+     * @param array $post Array containing vdfid, vpsid, protocol, src_hostname, src_port, dest_ip, dest_port
+     * @return array
+     */
+    function edit_domain_forwarding($post){
+        $post['editvdf'] = 1;
+        $path = 'index.php?act=vpsdomainf&vpsid='.(int)$post['vpsid'].'&vdfid='.(int)$post['vdfid'];
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Delete Domain Forwarding Record
+     *
+     * @param int $vpsid The VPS ID
+     * @param array $post Array containing delete (vdfid or array of vdfids)
+     * @return array
+     */
+    function delete_domain_forwarding($vpsid, $post){
+        $path = 'index.php?act=vpsdomainf&vpsid='.(int)$vpsid;
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    // =============================================
+    // SINGLE SIGN ON (SSO)
+    // =============================================
+
+    /**
+     * Generate SSO Token for VPS
+     *
+     * @param int $vpsid The VPS ID
+     * @return array Contains token_key and sid for SSO login
+     */
+    function sso($vpsid){
+        $path = 'index.php?act=sso&vpsid='.(int)$vpsid;
+        $res = $this->call($path);
+        
+        if(!empty($res['token_key']) && !empty($res['sid'])){
+            $res['login_url'] = $this->protocol.'://'.$this->ip.':'.$this->port.'/'.$res['token_key'].'/?as='.$res['sid'].'&svs='.$vpsid;
+        }
+        
+        return $res;
+    }
+
+    // =============================================
+    // IPv6 SUBNET MANAGEMENT
+    // =============================================
+
+    /**
+     * List IPv6 Subnets
+     *
+     * @param int $page Page number
+     * @param int $reslen Results per page
+     * @param array $post Search parameters
+     * @return array
+     */
+    function list_ipv6_subnet($page = 1, $reslen = 50, $post = array()){
+        $path = 'index.php?act=ipv6subnets&page='.$page.'&reslen='.$reslen;
+        if(!empty($post['ipsearch'])){
+            $path .= '&ipsearch='.$post['ipsearch'];
+        }
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Add IPv6 Subnet
+     *
+     * @param array $post Array containing ippid, ipv6_1 to ipv6_8, netmask
+     * @return array
+     */
+    function add_ipv6_subnet($post){
+        $post['addipv6subnet'] = 1;
+        $path = 'index.php?act=addipv6subnet';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Edit IPv6 Subnet
+     *
+     * @param array $post Array containing subnetid and updated fields
+     * @return array
+     */
+    function edit_ipv6_subnet($post){
+        $post['editipv6subnet'] = 1;
+        $path = 'index.php?act=editipv6subnet&subnetid='.(int)$post['subnetid'];
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Delete IPv6 Subnet
+     *
+     * @param array $post Array containing delete (subnetid or array of subnetids)
+     * @return array
+     */
+    function delete_ipv6_subnet($post){
+        $path = 'index.php?act=ipv6subnets';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Search IPv6 Subnet
+     *
+     * @param string $ip The IPv6 address to search
+     * @param int $page Page number
+     * @param int $reslen Results per page
+     * @return array
+     */
+    function search_ipv6_subnet($ip, $page = 1, $reslen = 50){
+        $path = 'index.php?act=ipv6subnets&ipsearch='.urlencode($ip).'&page='.$page.'&reslen='.$reslen;
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Add Internal IP Pool
+     *
+     * @param array $post Array containing serid, ippool_name, gateway, netmask, nat, firstip, lastip
+     * @return array
+     */
+    function add_internal_ippool($post){
+        $post['addippool'] = 1;
+        $post['internal'] = 1;
+        $path = 'index.php?act=addippool';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Add IPv6 Pool
+     *
+     * @param array $post Array containing serid, ippool_name, gateway, netmask, ns1, ns2, firstip, lastip
+     * @return array
+     */
+    function add_ipv6_pool($post){
+        $post['addippool'] = 1;
+        $post['iptype'] = 6;
+        $path = 'index.php?act=addippool';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Search IP Pool
+     *
+     * @param array $search Search parameters (poolname, poolgateway, netmask, nameserver, servers_search)
+     * @param int $page Page number
+     * @param int $reslen Results per page
+     * @return array
+     */
+    function search_ippool($search, $page = 1, $reslen = 50){
+        $path = 'index.php?act=ippool&page='.$page.'&reslen='.$reslen;
+        if(!empty($search['poolname'])) $path .= '&poolname='.$search['poolname'];
+        if(!empty($search['poolgateway'])) $path .= '&poolgateway='.$search['poolgateway'];
+        if(!empty($search['netmask'])) $path .= '&netmask='.$search['netmask'];
+        if(!empty($search['nameserver'])) $path .= '&nameserver='.$search['nameserver'];
+        if(isset($search['servers_search'])) $path .= '&servers_search='.$search['servers_search'];
+        
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Search IPs
+     *
+     * @param array $search Search parameters
+     * @param int $page Page number
+     * @param int $reslen Results per page
+     * @return array
+     */
+    function search_ips($search, $page = 1, $reslen = 50){
+        $path = 'index.php?act=ips&page='.$page.'&reslen='.$reslen;
+        if(!empty($search['ipsearch'])) $path .= '&ipsearch='.$search['ipsearch'];
+        if(!empty($search['ippoolsearch'])) $path .= '&ippoolsearch='.$search['ippoolsearch'];
+        if(!empty($search['macsearch'])) $path .= '&macsearch='.$search['macsearch'];
+        if(!empty($search['vps_search'])) $path .= '&vps_search='.$search['vps_search'];
+        if(isset($search['servers_search'])) $path .= '&servers_search='.$search['servers_search'];
+        if(isset($search['lockedsearch'])) $path .= '&lockedsearch='.$search['lockedsearch'];
+        if(!empty($search['ippid'])) $path .= '&ippid='.$search['ippid'];
+        
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Add IPv6 Address
+     *
+     * @param array $post Array containing ippid, ipv6 (full IPv6 address)
+     * @return array
+     */
+    function add_ipv6($post){
+        $post['submitip'] = 1;
+        $post['iptype'] = 6;
+        $path = 'index.php?act=addips';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    // =============================================
+    // STORAGE MANAGEMENT
+    // =============================================
+
+    /**
+     * Delete Storage
+     *
+     * @param int $stid Storage ID
+     * @return array
+     */
+    function delete_storage($stid){
+        $path = 'index.php?act=storage&delete='.(int)$stid;
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Delete Orphaned Disks
+     *
+     * @param array $post Array containing disk paths to delete
+     * @return array
+     */
+    function delete_orphaned_disks($post){
+        $path = 'index.php?act=orphaneddisks';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    // =============================================
+    // VOLUMES MANAGEMENT
+    // =============================================
+
+    /**
+     * List Volumes
+     *
+     * @param int $page Page number
+     * @param int $reslen Results per page
+     * @param array $search Search parameters
+     * @return array
+     */
+    function list_volumes($page = 1, $reslen = 50, $search = array()){
+        $path = 'index.php?act=volumes&page='.$page.'&reslen='.$reslen;
+        if(!empty($search)){
+            foreach($search as $k => $v){
+                $path .= '&'.$k.'='.urlencode($v);
+            }
+        }
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Add Volume
+     *
+     * @param array $post Array containing vpsid, size, st_uuid
+     * @return array
+     */
+    function add_volume($post){
+        $post['addvolume'] = 1;
+        $path = 'index.php?act=addvolume';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Edit Volume
+     *
+     * @param array $post Array containing volid and updated fields
+     * @return array
+     */
+    function edit_volume($post){
+        $post['editvolume'] = 1;
+        $path = 'index.php?act=editvolume&volid='.(int)$post['volid'];
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Delete Volume
+     *
+     * @param array $post Array containing delete (volid or array of volids)
+     * @return array
+     */
+    function delete_volume($post){
+        $path = 'index.php?act=volumes';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    // =============================================
+    // VPS FIREWALL MANAGEMENT
+    // =============================================
+
+    /**
+     * List Firewall Plans
+     *
+     * @param int $page Page number
+     * @param int $reslen Results per page
+     * @return array
+     */
+    function list_firewall_plans($page = 1, $reslen = 50){
+        $path = 'index.php?act=firewall_plans&page='.$page.'&reslen='.$reslen;
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Add Firewall Plan
+     *
+     * @param array $post Array containing fwplname and rules
+     * @return array
+     */
+    function add_firewall_plan($post){
+        $post['addfirewall_plans'] = 1;
+        $path = 'index.php?act=addfirewall_plans';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Edit Firewall Plan
+     *
+     * @param array $post Array containing fwplid, fwplname and rules
+     * @return array
+     */
+    function edit_firewall_plan($post){
+        $post['editfirewall_plans'] = 1;
+        $path = 'index.php?act=editfirewall_plans&fwplid='.(int)$post['fwplid'];
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Delete Firewall Plan
+     *
+     * @param array $post Array containing delete (fwplid or array of fwplids)
+     * @return array
+     */
+    function delete_firewall_plan($post){
+        $path = 'index.php?act=firewall_plans';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    // =============================================
+    // LOAD BALANCER MANAGEMENT
+    // =============================================
+
+    /**
+     * List Load Balancers
+     *
+     * @param int $page Page number
+     * @param int $reslen Results per page
+     * @param array $search Search parameters
+     * @return array
+     */
+    function list_load_balancers($page = 1, $reslen = 50, $search = array()){
+        $path = 'index.php?act=loadbalancers&page='.$page.'&reslen='.$reslen;
+        if(!empty($search)){
+            foreach($search as $k => $v){
+                $path .= '&'.$k.'='.urlencode($v);
+            }
+        }
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Create Load Balancer
+     *
+     * @param array $post Array containing name, algorithm, frontends, backends
+     * @return array
+     */
+    function create_load_balancer($post){
+        $post['addloadbalancer'] = 1;
+        $path = 'index.php?act=addloadbalancer';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Manage/Edit Load Balancer
+     *
+     * @param array $post Array containing lbid and updated configuration
+     * @return array
+     */
+    function manage_load_balancer($post){
+        $post['editloadbalancer'] = 1;
+        $path = 'index.php?act=editloadbalancer&lbid='.(int)$post['lbid'];
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Delete Load Balancer
+     *
+     * @param array $post Array containing delete (lbid or array of lbids)
+     * @return array
+     */
+    function delete_load_balancer($post){
+        $path = 'index.php?act=loadbalancers';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    // =============================================
+    // PASSTHROUGH MANAGEMENT
+    // =============================================
+
+    /**
+     * List Passthrough Devices
+     *
+     * @param int $serid Server ID (optional)
+     * @return array
+     */
+    function list_passthrough($serid = 0){
+        $path = 'index.php?act=passthrough';
+        if(!empty($serid)){
+            $path .= '&changeserid='.(int)$serid;
+        }
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Get Passthrough Device Info
+     *
+     * @param int $vpsid VPS ID
+     * @return array
+     */
+    function get_passthrough($vpsid){
+        $path = 'index.php?act=managevps&vpsid='.(int)$vpsid.'&get_passthrough=1';
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Assign Passthrough Device to VPS
+     *
+     * @param array $post Array containing vpsid and passthrough device info
+     * @return array
+     */
+    function assign_passthrough($post){
+        $post['save_passthrough'] = 1;
+        $path = 'index.php?act=managevps&vpsid='.(int)$post['vpsid'];
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    // =============================================
+    // GENERATE SSH KEYS
+    // =============================================
+
+    /**
+     * Generate SSH Key Pair
+     *
+     * @return array Contains public_key and private_key
+     */
+    function generate_keys(){
+        $path = 'index.php?act=addvs&generate_keys=1';
+        $res = $this->call($path);
+        return $res;
+    }
+
+    // =============================================
+    // SERVER MONITORING
+    // =============================================
+
+    /**
+     * Get Server Monitoring Data
+     *
+     * @param int $serid Server ID
+     * @return array
+     */
+    function server_monitoring($serid = 0){
+        $path = 'index.php?act=server_monitoring';
+        if(!empty($serid)){
+            $path .= '&changeserid='.(int)$serid;
+        }
+        $res = $this->call($path);
+        return $res;
+    }
+
+    // =============================================
+    // API CREDENTIALS MANAGEMENT
+    // =============================================
+
+    /**
+     * List API Credentials
+     *
+     * @param int $page Page number
+     * @param int $reslen Results per page
+     * @return array
+     */
+    function list_api_credentials($page = 1, $reslen = 50){
+        $path = 'index.php?act=api_credentials&page='.$page.'&reslen='.$reslen;
+        $res = $this->call($path);
+        return $res;
+    }
+
+    /**
+     * Create API Credentials
+     *
+     * @param array $post Array containing api key settings
+     * @return array
+     */
+    function create_api_credentials($post){
+        $post['addapi_credentials'] = 1;
+        $path = 'index.php?act=addapi_credentials';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Edit API Credentials
+     *
+     * @param array $post Array containing apiid and updated settings
+     * @return array
+     */
+    function edit_api_credentials($post){
+        $post['editapi_credentials'] = 1;
+        $path = 'index.php?act=editapi_credentials&apiid='.(int)$post['apiid'];
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Delete API Credentials
+     *
+     * @param array $post Array containing delete (apiid or array of apiids)
+     * @return array
+     */
+    function delete_api_credentials($post){
+        $path = 'index.php?act=api_credentials';
+        $res = $this->call($path, array(), $post);
+        return $res;
+    }
+
+    /**
+     * Get API Logs
+     *
+     * @param int $page Page number
+     * @param int $reslen Results per page
+     * @param array $search Search parameters
+     * @return array
+     */
+    function api_logs($page = 1, $reslen = 50, $search = array()){
+        $path = 'index.php?act=apilogs&page='.$page.'&reslen='.$reslen;
+        if(!empty($search)){
+            foreach($search as $k => $v){
+                $path .= '&'.$k.'='.urlencode($v);
+            }
+        }
+        $res = $this->call($path);
+        return $res;
+    }
+
 } // Class Ends
 
 ?>

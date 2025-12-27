@@ -1409,6 +1409,453 @@ class Virtualizor_Enduser_API {
 		return $return;
 	}
 
+	/**
+	 * Edit Volume
+	 *
+	 * @param int $volid Volume ID
+	 * @param array $post Updated volume settings
+	 * @return array
+	 */
+	function edit_volume($volid, $post = array()){
+		$post['editvolume'] = 1;
+		$resp = $this->call('index.php?act=volume&volid='.(int)$volid, $post);
+		return $resp;
+	}
+
+	// =============================================
+	// DELETE VM
+	// =============================================
+
+	/**
+	 * Delete a Virtual Machine
+	 *
+	 * @param int $vid The VPS ID
+	 * @return array
+	 */
+	function deletevm($vid){
+		$resp = $this->call('index.php?act=listvs&delvs='.(int)$vid);
+		return $resp;
+	}
+
+	// =============================================
+	// VERTICAL SCALING
+	// =============================================
+
+	/**
+	 * Get Vertical Scaling Data
+	 *
+	 * @param int $vid The VPS ID
+	 * @return array
+	 */
+	function get_vertical_data($vid){
+		$res = $this->call('index.php?svs='.$vid.'&act=vpsmanage&get_ver_data=1');
+		return $res;
+	}
+
+	// =============================================
+	// CLOUD BILLING
+	// =============================================
+
+	/**
+	 * Get Cloud Billing Information
+	 *
+	 * @return array
+	 */
+	function cloudbilling(){
+		$res = $this->call('index.php?act=cloudbilling');
+		return $res;
+	}
+
+	/**
+	 * Get Invoices
+	 *
+	 * @param int $page Page number
+	 * @param int $reslen Results per page
+	 * @return array
+	 */
+	function invoices($page = 1, $reslen = 50){
+		$res = $this->call('index.php?act=invoices&page='.$page.'&reslen='.$reslen);
+		return $res;
+	}
+
+	/**
+	 * Get Invoice Details
+	 *
+	 * @param int $invoid Invoice ID
+	 * @return array
+	 */
+	function invoice_details($invoid){
+		$res = $this->call('index.php?act=invoices&invoid='.(int)$invoid);
+		return $res;
+	}
+
+	/**
+	 * Get Transactions
+	 *
+	 * @param int $page Page number
+	 * @param int $reslen Results per page
+	 * @return array
+	 */
+	function transactions($page = 1, $reslen = 50){
+		$res = $this->call('index.php?act=transactions&page='.$page.'&reslen='.$reslen);
+		return $res;
+	}
+
+	// =============================================
+	// VPS FIREWALL
+	// =============================================
+
+	/**
+	 * List VPS Firewall Plans
+	 *
+	 * @param int $vid The VPS ID
+	 * @return array
+	 */
+	function list_firewall($vid){
+		$res = $this->call('index.php?svs='.$vid.'&act=vps_firewall');
+		return $res;
+	}
+
+	/**
+	 * Add VPS Firewall Plan
+	 *
+	 * @param int $vid The VPS ID
+	 * @param array $post Firewall rules configuration
+	 * @return array
+	 */
+	function add_firewall($vid, $post = array()){
+		$post['add_firewall'] = 1;
+		$res = $this->call('index.php?svs='.$vid.'&act=vps_firewall', $post);
+		return $res;
+	}
+
+	/**
+	 * Edit VPS Firewall Plan
+	 *
+	 * @param int $vid The VPS ID
+	 * @param int $fwid Firewall Plan ID
+	 * @param array $post Updated firewall rules
+	 * @return array
+	 */
+	function edit_firewall($vid, $fwid, $post = array()){
+		$post['edit_firewall'] = 1;
+		$post['fwid'] = $fwid;
+		$res = $this->call('index.php?svs='.$vid.'&act=vps_firewall', $post);
+		return $res;
+	}
+
+	/**
+	 * Delete VPS Firewall Plan
+	 *
+	 * @param int $vid The VPS ID
+	 * @param int $fwid Firewall Plan ID
+	 * @return array
+	 */
+	function delete_firewall($vid, $fwid){
+		$post['delete'] = $fwid;
+		$res = $this->call('index.php?svs='.$vid.'&act=vps_firewall', $post);
+		return $res;
+	}
+
+	// =============================================
+	// SELF SHUTDOWN
+	// =============================================
+
+	/**
+	 * Delete Self Shutdown Schedule
+	 *
+	 * @param int $vid The VPS ID
+	 * @return array
+	 */
+	function delete_self_shutdown($vid){
+		$post['delete_self_shutdown'] = 1;
+		$res = $this->call('index.php?svs='.$vid.'&act=self_shutdown', $post);
+		return $res;
+	}
+
+	// =============================================
+	// PROCESSES - KILL
+	// =============================================
+
+	/**
+	 * Kill Processes
+	 *
+	 * @param int $vid The VPS ID
+	 * @param array $pids Array of process IDs to kill
+	 * @return array
+	 */
+	function kill_processes($vid, $pids = array()){
+		$post['kill'] = $pids;
+		$resp = $this->call('index.php?svs='.$vid.'&act=processes', $post);
+		return $resp;
+	}
+
+	// =============================================
+	// SERVICES - INDIVIDUAL ACTIONS
+	// =============================================
+
+	/**
+	 * Start a Service
+	 *
+	 * @param int $vid The VPS ID
+	 * @param string $service Service name
+	 * @return array
+	 */
+	function start_service($vid, $service){
+		$post['start'] = $service;
+		$resp = $this->call('index.php?svs='.$vid.'&act=services', $post);
+		return $resp;
+	}
+
+	/**
+	 * Stop a Service
+	 *
+	 * @param int $vid The VPS ID
+	 * @param string $service Service name
+	 * @return array
+	 */
+	function stop_service($vid, $service){
+		$post['stop'] = $service;
+		$resp = $this->call('index.php?svs='.$vid.'&act=services', $post);
+		return $resp;
+	}
+
+	/**
+	 * Restart a Service
+	 *
+	 * @param int $vid The VPS ID
+	 * @param string $service Service name
+	 * @return array
+	 */
+	function restart_service($vid, $service){
+		$post['restart'] = $service;
+		$resp = $this->call('index.php?svs='.$vid.'&act=services', $post);
+		return $resp;
+	}
+
+	// =============================================
+	// REVERSE DNS
+	// =============================================
+
+	/**
+	 * List Reverse DNS Records
+	 *
+	 * @param int $page Page number
+	 * @param int $reslen Results per page
+	 * @return array
+	 */
+	function list_rdns($page = 1, $reslen = 50){
+		$res = $this->call('index.php?act=rdns&page='.$page.'&reslen='.$reslen);
+		return $res;
+	}
+
+	/**
+	 * Add Reverse DNS Record
+	 *
+	 * @param array $post Array containing ip, hostname
+	 * @return array
+	 */
+	function add_rdns($post){
+		$post['add_rdns'] = 1;
+		$res = $this->call('index.php?act=rdns', $post);
+		return $res;
+	}
+
+	/**
+	 * Delete Reverse DNS Record
+	 *
+	 * @param int $rdnsid Reverse DNS Record ID
+	 * @return array
+	 */
+	function delete_rdns($rdnsid){
+		$res = $this->call('index.php?act=rdns&delete='.(int)$rdnsid);
+		return $res;
+	}
+
+	// =============================================
+	// DNS RECORDS
+	// =============================================
+
+	/**
+	 * Get Zone Info
+	 *
+	 * @param int $domainid Domain ID
+	 * @return array
+	 */
+	function zone_info($domainid){
+		$res = $this->call('index.php?act=managezone&domainid='.(int)$domainid);
+		return $res;
+	}
+
+	/**
+	 * Add DNS Record
+	 *
+	 * @param int $domainid Domain ID
+	 * @param array $post Record data (name, type, content, ttl, prio)
+	 * @return array
+	 */
+	function add_dns_record($domainid, $post){
+		$post['add_record'] = 1;
+		$res = $this->call('index.php?act=managezone&domainid='.(int)$domainid, $post);
+		return $res;
+	}
+
+	/**
+	 * Edit DNS Record
+	 *
+	 * @param int $domainid Domain ID
+	 * @param int $recordid Record ID
+	 * @param array $post Updated record data
+	 * @return array
+	 */
+	function edit_dns_record($domainid, $recordid, $post){
+		$post['edit_record'] = 1;
+		$post['recordid'] = $recordid;
+		$res = $this->call('index.php?act=managezone&domainid='.(int)$domainid, $post);
+		return $res;
+	}
+
+	/**
+	 * Delete DNS Record
+	 *
+	 * @param int $domainid Domain ID
+	 * @param int $recordid Record ID
+	 * @return array
+	 */
+	function delete_dns_record($domainid, $recordid){
+		$res = $this->call('index.php?act=managezone&domainid='.(int)$domainid.'&delete='.(int)$recordid);
+		return $res;
+	}
+
+	// =============================================
+	// DNS SERVER
+	// =============================================
+
+	/**
+	 * List DNS Servers
+	 *
+	 * @return array
+	 */
+	function list_dns_servers(){
+		$res = $this->call('index.php?act=pdns');
+		return $res;
+	}
+
+	/**
+	 * Add DNS Server/Zone
+	 *
+	 * @param array $post DNS server/zone configuration
+	 * @return array
+	 */
+	function add_dns($post){
+		$post['add_dns'] = 1;
+		$res = $this->call('index.php?act=pdns', $post);
+		return $res;
+	}
+
+	/**
+	 * Delete DNS Server/Zone
+	 *
+	 * @param int $dnsid DNS Server/Zone ID
+	 * @return array
+	 */
+	function delete_dns($dnsid){
+		$res = $this->call('index.php?act=pdns&del='.(int)$dnsid);
+		return $res;
+	}
+
+	// =============================================
+	// USER SSO
+	// =============================================
+
+	/**
+	 * Generate SSO URL for User
+	 *
+	 * @param int $uid User ID
+	 * @return array|string Returns SSO URL or array with token info
+	 */
+	function user_sso($uid){
+		$resp = $this->call('index.php?act=sso&uid='.(int)$uid);
+		
+		if(!empty($resp['token_key']) && !empty($resp['sid'])){
+			$url = 'https://'.$this->ip.':'.$this->port.'/'.$resp['token_key'].'/?as='.$resp['sid'];
+			return $url;
+		}
+		
+		return $resp;
+	}
+
+	// =============================================
+	// RECIPE MANAGEMENT
+	// =============================================
+
+	/**
+	 * Get Recipe Details
+	 *
+	 * @param int $rid Recipe ID
+	 * @return array
+	 */
+	function get_recipe($rid){
+		$res = $this->call('index.php?act=recipes&rid='.(int)$rid);
+		return $res;
+	}
+
+	// =============================================
+	// DOMAIN FORWARDING
+	// =============================================
+
+	/**
+	 * List Domain Forwarding Records
+	 *
+	 * @param int $vid VPS ID
+	 * @return array
+	 */
+	function list_domain_forwarding($vid){
+		$res = $this->call('index.php?act=managevdf&svs='.(int)$vid);
+		return $res;
+	}
+
+	/**
+	 * Add Domain Forwarding Record
+	 *
+	 * @param int $vid VPS ID
+	 * @param array $post Forwarding configuration
+	 * @return array
+	 */
+	function add_domain_forwarding($vid, $post){
+		$post['addvdf'] = 1;
+		$res = $this->call('index.php?act=managevdf&svs='.(int)$vid, $post);
+		return $res;
+	}
+
+	/**
+	 * Edit Domain Forwarding Record
+	 *
+	 * @param int $vid VPS ID
+	 * @param int $vdfid Domain Forwarding Record ID
+	 * @param array $post Updated configuration
+	 * @return array
+	 */
+	function edit_domain_forwarding($vid, $vdfid, $post){
+		$post['editvdf'] = 1;
+		$post['vdfid'] = $vdfid;
+		$res = $this->call('index.php?act=managevdf&svs='.(int)$vid, $post);
+		return $res;
+	}
+
+	/**
+	 * Delete Domain Forwarding Record
+	 *
+	 * @param int $vid VPS ID
+	 * @param int $vdfid Domain Forwarding Record ID
+	 * @return array
+	 */
+	function delete_domain_forwarding($vid, $vdfid){
+		$post['delete'] = $vdfid;
+		$res = $this->call('index.php?act=managevdf&svs='.(int)$vid, $post);
+		return $res;
+	}
+
 }
 
 //////////////
