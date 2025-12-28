@@ -1,71 +1,197 @@
-# PHP Virtualizor API Wrapper
+<div align="center">
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/Github-Aiko/PHP-Virtualizor)
+# 🖥️ PHP Virtualizor API Wrapper
+
+**A modern, elegant PHP wrapper for the Virtualizor API**
+
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/Github-Aiko/PHP-Virtualizor)
+[![Packagist Version](https://img.shields.io/packagist/v/github-aiko/php-virtualizor?style=for-the-badge&logo=packagist&logoColor=white)](https://packagist.org/packages/github-aiko/php-virtualizor)
+[![PHP Version](https://img.shields.io/packagist/php-v/github-aiko/php-virtualizor?style=for-the-badge&logo=php&logoColor=white)](https://packagist.org/packages/github-aiko/php-virtualizor)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
 [![CI](https://github.com/Github-Aiko/PHP-Virtualizor/actions/workflows/ci.yml/badge.svg)](https://github.com/Github-Aiko/PHP-Virtualizor/actions/workflows/ci.yml)
-[![Packagist](https://img.shields.io/packagist/v/github-aiko/php-virtualizor)](https://packagist.org/packages/github-aiko/php-virtualizor)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/github-aiko/php-virtualizor?color=blue)](https://packagist.org/packages/github-aiko/php-virtualizor)
 
-This is a wrapper for the API for Virtualizor.
+</div>
 
-**Project Repository:** https://github.com/Github-Aiko/PHP-Virtualizor
+---
 
-### Note
-The Base-client is Forked from https://github.com/bennetgallein/VirtualizorPHP.
-Code has been completely recoded.
+## 📋 Table of Contents
 
-Documentation for this Version of the API can be found here:
-http://virtualizor.com/admin-api/#virtual-servers
+- [✨ Features](#-features)
+- [📦 Requirements](#-requirements)
+- [🚀 Installation](#-installation)
+- [⚡ Quick Start](#-quick-start)
+- [📖 API Reference](#-api-reference)
+- [🧪 Development](#-development)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
-## Installation
+---
 
-Install this library via composer is pretty easy. 
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 🖥️ **Virtual Servers** | Create, manage, start, stop, restart VPS instances |
+| 💾 **OS Templates** | List and manage operating system templates |
+| 🌐 **IP Pool** | Manage IP address pools and allocations |
+| 👥 **Users** | User management and authentication |
+| 🔒 **Secure** | Built-in API key authentication |
+| ⚡ **Modern PHP** | Supports PHP 7.4, 8.0, 8.1, 8.2, 8.3, 8.4 |
+
+---
+
+## 📦 Requirements
+
+- **PHP** >= 7.4
+- **ext-json** extension
+- **Virtualizor** panel with API access enabled
+
+---
+
+## 🚀 Installation
+
+Install via Composer:
+
 ```bash
 composer require github-aiko/php-virtualizor
 ```
-And then you can get started with your project.
 
-## Object Description:
+---
 
-Every call starts by Initializing the `Virtualizor` Object. Once initialized you can use it over and over again.
+## ⚡ Quick Start
+
+### Initialize the Client
+
 ```php
-$virt = new \Virtualizor\Virtualizor("ip", "key", "pass", "port");
+<?php
+
+require 'vendor/autoload.php';
+
+use Virtualizor\Virtualizor;
+
+// Initialize with your Virtualizor credentials
+$virtualizor = new Virtualizor(
+    'your-server-ip',    // Server IP
+    'your-api-key',      // API Key  
+    'your-api-pass',     // API Password
+    '4085',              // Admin Port (default: 4085)
+    '4083'               // Client Port (default: 4083)
+);
 ```
 
-### ServerInfo
+### Virtual Server Management
 
-Get some information about the master
 ```php
-$info = $virt->serverInfo();
+// Get VirtualServer instance
+$server = $virtualizor->server();
+
+// List all virtual servers
+$servers = $server->listAll();
+
+// Get specific VPS info
+$vpsInfo = $server->info($vpsId);
+
+// Start/Stop/Restart VPS
+$server->start($vpsId);
+$server->stop($vpsId);
+$server->restart($vpsId);
 ```
 
-## Development
+### OS Templates
 
-### Testing
+```php
+// Get OS Templates instance
+$templates = $virtualizor->osTemplates();
+
+// List all available templates
+$allTemplates = $templates->listAll();
+```
+
+### IP Pool Management
+
+```php
+// Get IP Pool instance
+$ipPool = $virtualizor->IPPool();
+
+// List all IP pools
+$pools = $ipPool->listAll();
+```
+
+### User Management
+
+```php
+// Get Users instance
+$users = $virtualizor->Users();
+
+// List all users
+$allUsers = $users->listAll();
+```
+
+---
+
+## 📖 API Reference
+
+### Main Class: `Virtualizor`
+
+| Method | Return Type | Description |
+|--------|-------------|-------------|
+| `server()` | `VirtualServer` | Virtual server operations |
+| `osTemplates()` | `OSTemplates` | OS template operations |
+| `IPPool()` | `IPPool` | IP pool operations |
+| `Users()` | `Users` | User management operations |
+
+> 📚 **Full Documentation:** [Virtualizor Admin API](http://virtualizor.com/admin-api/)
+
+---
+
+## 🧪 Development
+
+### Running Tests
+
 ```bash
+# Install dependencies
 composer install
+
+# Run PHPUnit tests
 vendor/bin/phpunit
 ```
 
-### CI/CD
-Project sử dụng GitHub Actions để tự động:
-- Test trên nhiều phiên bản PHP (7.4, 8.0, 8.1, 8.2, 8.3, 8.4)
-- Validate composer.json
-- Tự động cập nhật Packagist khi có tag release
+### CI/CD Pipeline
 
-Xem thêm: [.github/workflows/README.md](.github/workflows/README.md)
+This project uses **GitHub Actions** for continuous integration:
 
-### Submit lên Packagist
-Để submit package lên Packagist:
-1. Truy cập: https://packagist.org/packages/submit
-2. Đăng nhập bằng GitHub
-3. Nhập URL: `https://github.com/Github-Aiko/PHP-Virtualizor`
-4. Click **Check** → **Submit**
+| Check | Versions |
+|-------|----------|
+| 🧪 Unit Tests | PHP 7.4, 8.0, 8.1, 8.2, 8.3, 8.4 |
+| ✅ Composer Validation | All versions |
+| 📦 Auto Packagist Update | On release tags |
 
-Xem hướng dẫn chi tiết: [SETUP.md](SETUP.md)
+---
 
-## Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
+## 🤝 Contributing
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Contributions are welcome! Here's how you can help:
 
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. 💾 Commit your changes (`git commit -m 'Add amazing feature'`)
+4. 📤 Push to the branch (`git push origin feature/amazing-feature`)
+5. 🔃 Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**Made with ❤️ by [Github-Aiko](https://github.com/Github-Aiko)**
+
+*Based on [VirtualizorPHP](https://github.com/bennetgallein/VirtualizorPHP) - completely recoded*
+
+</div>
