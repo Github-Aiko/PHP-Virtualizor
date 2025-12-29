@@ -1094,10 +1094,11 @@ class Virtualizor_Admin_API {
         //$post = $this->clean_post($post, 1);
         $ret = $this->call($path, '', $post, $cookies);
         return array(
-            'title' => $ret['title'],
-            'done' => $ret['done'],
-            'error' => @empty($ret['error']) ? array() : $ret['error'],
-            'vs_info' => $ret['vps']
+            'title' => $ret['title'] ?? '',
+            'done' => $ret['done'] ?? false,
+            'error' => empty($ret['error']) ? array() : $ret['error'],
+            'vs_info' => $ret['vps'] ?? null,
+            'timenow' => $ret['timenow'] ?? null,
         );
     }
 
@@ -1107,10 +1108,11 @@ class Virtualizor_Admin_API {
         $path = 'index.php?act=managevps&vpsid='.$post['vpsid'];
         $ret = $this->call($path, array(), $post);
         return array(
-            'title' => $ret['title'],
-            'done' => $ret['done'],
-            'error' => @empty($ret['error']) ? array() : $ret['error'],
-            'vs_info' => $ret['vps']
+            'title' => $ret['title'] ?? '',
+            'done' => $ret['done'] ?? false,
+            'error' => empty($ret['error']) ? array() : $ret['error'],
+            'vs_info' => $ret['vps'] ?? null,
+            'timenow' => $ret['timenow'] ?? null,
         );
     }
 
