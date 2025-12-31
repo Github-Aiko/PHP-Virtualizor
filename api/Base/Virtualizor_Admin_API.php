@@ -597,17 +597,84 @@ class Virtualizor_Admin_API {
         return $ret;
     }
 
+    /**
+     * List tasks/actions
+     *
+     * @param int $page Page number
+     * @param int $reslen Results per page
+     * @param array $post Filter parameters (actid, vpsid, username, action, status, order, show_logs)
+     * @return array Tasks list
+     */
     function tasks($page=1, $reslen=50, $post=array()){
         if(empty($post)){
-            $path = 'index.php?act=tasks';
+            $path = 'index.php?act=tasks&page='.$page.'&reslen='.$reslen;
         }elseif(isset($post['show_logs'])){
             $path = 'index.php?act=tasks';
 
         }else{
-            $path = 'index.php?act=tasks&actid='.$post['actid'].'&vpsid='.$post['vpsid'].'&username='.$post['username'].'&action='.$post['action'].'&status='.$post['status'].'&order='.$post['order'].'&page='.$page.'&reslen='.$reslen;
+            $path = 'index.php?act=tasks';
+            if(!empty($post['actid'])) $path .= '&actid='.$post['actid'];
+            if(!empty($post['vpsid'])) $path .= '&vpsid='.$post['vpsid'];
+            if(!empty($post['username'])) $path .= '&username='.$post['username'];
+            if(!empty($post['action'])) $path .= '&action='.$post['action'];
+            if(isset($post['status'])) $path .= '&status='.$post['status'];
+            if(!empty($post['order'])) $path .= '&order='.$post['order'];
+            $path .= '&page='.$page.'&reslen='.$reslen;
         }
         $ret = $this->call($path,array(),$post);
         return $ret;
+    }
+    
+    /**
+     * Get a specific task by ID
+     *
+     * @param int $actid The task/action ID
+     * @return array|null Task info if found, null otherwise
+     */
+    function getTask($actid){
+        $result = $this->tasks(1, 100, array('actid' => (int)$actid));
+        
+        if(!empty($result['tasks']) && is_array($result['tasks'])){
+            foreach($result['tasks'] as $task){
+                if((int)($task['actid'] ?? 0) === (int)$actid){
+                    return $task;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Check if a task is completed
+     *
+     * @param int $actid The task/action ID
+     * @return array Status info with 'completed' boolean
+     */
+    function isTaskCompleted($actid){
+        $task = $this->getTask($actid);
+        
+        if($task === null){
+            // Task not found - likely completed and removed from queue
+            return array(
+                'completed' => true,
+                'success' => true,
+                'progress' => 100,
+                'message' => 'Task completed or not found'
+            );
+        }
+        
+        $status = $task['status'] ?? 'unknown';
+        $progress = (int)($task['progress'] ?? 0);
+        
+        return array(
+            'completed' => ($status === '1' || $status === '-1'),
+            'success' => ($status === '1'),
+            'failed' => ($status === '-1'),
+            'progress' => $progress,
+            'status_code' => $status,
+            'task' => $task
+        );
     }
 
     function addpdns($post){
@@ -1102,6 +1169,19 @@ class Virtualizor_Admin_API {
         );
     }
 
+    /**
+     * Manage/Edit VPS settings
+     * 
+     * Can be used to update:
+     * - hostname: New hostname
+     * - rootpass: New root password
+     * - ips: Array of IPv4 addresses
+     * - ips6: Array of IPv6 addresses
+     * - and other VPS settings
+     *
+     * @param array $post Must contain 'vpsid' and fields to update
+     * @return array Response with done status and any errors
+     */
     function managevps($post){
         $post['theme_edit'] = 1;
         $post['editvps'] = 1;
@@ -1113,7 +1193,55 @@ class Virtualizor_Admin_API {
             'error' => empty($ret['error']) ? array() : $ret['error'],
             'vs_info' => $ret['vps'] ?? null,
             'timenow' => $ret['timenow'] ?? null,
+            'full_response' => $ret,
         );
+    }
+    
+    /**
+     * Update VPS hostname
+     *
+     * @param int $vpsid VPS ID
+     * @param string $hostname New hostname
+     * @return array Response
+     */
+    function updateVpsHostname($vpsid, $hostname){
+        return $this->managevps(array(
+            'vpsid' => (int)$vpsid,
+            'hostname' => $hostname
+        ));
+    }
+    
+    /**
+     * Update VPS root password
+     *
+     * @param int $vpsid VPS ID
+     * @param string $rootpass New root password
+     * @return array Response
+     */
+    function updateVpsPassword($vpsid, $rootpass){
+        return $this->managevps(array(
+            'vpsid' => (int)$vpsid,
+            'rootpass' => $rootpass
+        ));
+    }
+    
+    /**
+     * Update VPS IPs
+     *
+     * @param int $vpsid VPS ID
+     * @param array $ips Array of IPv4 addresses
+     * @param array $ips6 Array of IPv6 addresses (optional)
+     * @return array Response
+     */
+    function updateVpsIps($vpsid, $ips, $ips6 = array()){
+        $post = array(
+            'vpsid' => (int)$vpsid,
+            'ips' => $ips
+        );
+        if(!empty($ips6)){
+            $post['ips6'] = $ips6;
+        }
+        return $this->managevps($post);
     }
 
     function create_single_vps_backup($vpsid){
@@ -1342,10 +1470,13 @@ class Virtualizor_Admin_API {
      *
      * @author       Pulkit Gupta
      * @param        int page number, if not specified then only 50 records are returned.
+     * @param        int reslen number of results per page
+     * @param        array search parameters (vpsid, vps_name, vps_ip, etc.)
+     * @param        bool full_result if true, returns full response including pagination
      * @return       array The unserialized array on success OR false on failure
      *
      */
-    function listvs($page = 1, $reslen = 50, $search=array()){
+    function listvs($page = 1, $reslen = 50, $search=array(), $full_result = false){
 
         if(empty($search)){
             $path = 'index.php?act=vs&page='.$page.'&reslen='.$reslen;
@@ -1357,8 +1488,47 @@ class Virtualizor_Admin_API {
         }
 
         $result = $this->call($path);
+        
+        if($full_result){
+            return $result;
+        }
+        
         $ret = $result['vs'];
         return $ret;
+    }
+    
+    /**
+     * Get VPS by ID
+     *
+     * @param        int $vpsid The VPS ID
+     * @return       array The VPS info or null if not found
+     */
+    function getVpsById($vpsid){
+        $path = 'index.php?act=vs&vpsid='.(int)$vpsid;
+        $result = $this->call($path);
+        return $result;
+    }
+    
+    /**
+     * Get all VPS IDs on the server
+     *
+     * @param        int $page Page number
+     * @param        int $reslen Results per page (use high number to get all)
+     * @return       array Array of VPS IDs
+     */
+    function getAllVpsIds($page = 1, $reslen = 1000){
+        $path = 'index.php?act=vs&page='.$page.'&reslen='.$reslen;
+        $result = $this->call($path);
+        
+        $ids = array();
+        if(!empty($result['vs']) && is_array($result['vs'])){
+            foreach($result['vs'] as $vps){
+                if(!empty($vps['vpsid'])){
+                    $ids[] = (int)$vps['vpsid'];
+                }
+            }
+        }
+        return $ids;
     }
 
     function update_vps_net_rules($vpsid){
@@ -1831,12 +2001,82 @@ class Virtualizor_Admin_API {
 
     }
 
+    /**
+     * Clone a VPS
+     * 
+     * Required POST parameters:
+     * - vpsid: array of VPS IDs to clone (e.g. [123])
+     * - from_server: Server ID where source VPS is located (0 for master/current)
+     * - to_server: Server ID to clone to (0 for same server)
+     * - storage: array of storage IDs (e.g. [1])
+     * 
+     * Optional parameters:
+     * - preserve_ip: 1 to preserve IPs, 0 to not preserve (default: 0)
+     * - speed_limit: Bandwidth limit for migration in MB/s
+     *
+     * @param array $post Clone parameters
+     * @return array Response containing actid (task ID) on success
+     */
     function clonevps($post){
         $path = 'index.php?act=clone';
         $post['migrate'] = 1;
         $post['migrate_but'] = 1;
         $res = $this->call($path, array(), $post);
         return $res;
+    }
+    
+    /**
+     * Get clone/migration task status
+     *
+     * @param int $actid The task/action ID
+     * @return array Task status info
+     */
+    function getCloneTaskStatus($actid){
+        $path = 'index.php?act=tasks&actid='.(int)$actid;
+        $res = $this->call($path);
+        
+        if(!empty($res['tasks']) && is_array($res['tasks'])){
+            foreach($res['tasks'] as $task){
+                if((int)($task['actid'] ?? 0) === (int)$actid){
+                    return array(
+                        'found' => true,
+                        'status' => $task['status'] ?? 'unknown',
+                        'progress' => (int)($task['progress'] ?? 0),
+                        'action' => $task['action'] ?? '',
+                        'started' => $task['started'] ?? '',
+                        'ended' => $task['ended'] ?? '',
+                        'data' => $task
+                    );
+                }
+            }
+        }
+        
+        // Task not found - might be completed and purged
+        return array(
+            'found' => false,
+            'status' => 'completed',
+            'progress' => 100
+        );
+    }
+    
+    /**
+     * Find VPS by hostname
+     *
+     * @param string $hostname The hostname to search for
+     * @return array|null VPS info if found, null otherwise
+     */
+    function findVpsByHostname($hostname){
+        $result = $this->listvs(1, 1000, array('vps_name' => $hostname), true);
+        
+        if(!empty($result['vs']) && is_array($result['vs'])){
+            foreach($result['vs'] as $vps){
+                if(($vps['hostname'] ?? '') === $hostname){
+                    return $vps;
+                }
+            }
+        }
+        
+        return null;
     }
 
     function migrate($post){
